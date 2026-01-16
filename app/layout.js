@@ -1,8 +1,6 @@
-// app/layout.js
 import { Sarabun } from "next/font/google";
 import "./globals.css";
 
-// โหลด Font Sarabun มาเตรียมไว้
 const sarabun = Sarabun({
   weight: ['300', '400', '500', '600', '700'],
   subsets: ['thai', 'latin'],
@@ -17,7 +15,6 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="th">
-      {/* บังคับใช้ className ของ sarabun โดยตรงที่ body */}
       <body className={`${sarabun.className} bg-slate-50 antialiased`}>
         {children}
       </body>
