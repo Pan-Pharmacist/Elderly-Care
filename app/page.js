@@ -31,7 +31,7 @@ export default function Home() {
     if (!file) return;
     const data = await processImage(file);
     if (data?.error) {
-      alert("AI อ่านไม่ออก: " + data.error);
+      alert("ระบบ Elderly Care อ่านไม่ออก: " + data.error);
       return;
     }
     if (targetMode === 'scan') {
@@ -114,7 +114,7 @@ export default function Home() {
              <div className="absolute inset-0 flex items-center justify-center"><Activity className="text-teal-500 animate-pulse" /></div>
           </div>
           <h2 className="text-2xl font-bold text-slate-800 mt-8">กำลังประมวลผล...</h2>
-          <p className="text-slate-500 mt-2 font-light text-lg">AI กำลังอ่านฉลากยา กรุณารอสักครู่</p>
+          <p className="text-slate-500 mt-2 font-light text-lg">ระบบ Elderly Care กำลังอ่านฉลากยา กรุณารอสักครู่</p>
         </div>
       </div>
     );
@@ -264,3 +264,4 @@ export default function Home() {
     );
   }
 }
+
