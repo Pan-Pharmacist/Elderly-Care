@@ -20,8 +20,7 @@ export async function POST(req) {
     
     const genAI = new GoogleGenerativeAI(apiKey);
     
-    // --- จุดที่แก้ไข: อัปเกรดเป็น Gemini 2.5 Flash ---
-    // โมเดลนี้เร็วและแม่นยำกว่า 1.5 มาก และรองรับภาษาไทยดีเยี่ยม
+    // --- จุดที่อัปเกรด: ใช้ Gemini 2.5 Flash (รุ่นมาตรฐานปี 2026) ---
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); 
 
     const prompt = `
@@ -30,8 +29,8 @@ export async function POST(req) {
       
       Extract and return ONLY a JSON object with these fields:
       {
-        "drug_name": "Generic Name or Brand Name (ภาษาไทยถ้ามี)",
-        "indication": "สรรพคุณสั้นๆ ง่ายๆ (เช่น แก้ปวด, ลดความดัน)",
+        "drug_name": "ชื่อยา (Generic Name หรือ Brand Name)",
+        "indication": "สรรพคุณสั้นๆ เข้าใจง่าย (เช่น แก้ปวด, ลดความดัน)",
         "usage_short": "วิธีใช้แบบกระชับ (เช่น วันละ 1 เม็ด หลังอาหารเช้า)",
         "times": ["morning", "noon", "evening", "bedtime"], 
         "quantity": "จำนวนเม็ดต่อมื้อ (ใส่เฉพาะตัวเลข เช่น 1, 0.5)",
@@ -39,7 +38,7 @@ export async function POST(req) {
       }
 
       Conditions:
-      - times: Select from [morning, noon, evening, bedtime] based on the label.
+      - times: Select from [morning, noon, evening, bedtime].
       - If image is NOT medication: return {"error": "ภาพไม่ชัดเจน หรือไม่ใช่ฉลากยา"}
     `;
 
@@ -56,14 +55,14 @@ export async function POST(req) {
       return NextResponse.json(JSON.parse(text));
     } catch (e) {
       console.error("JSON Parse Error:", text);
-      return NextResponse.json({ error: "อ่านข้อมูลไม่สำเร็จ กรุณาถ่ายใหม่ให้ชัดขึ้น" }, { status: 500 });
+      return NextResponse.json({ error: "AI อ่านข้อมูลไม่สำเร็จ กรุณาลองถ่ายใหม่อีกครั้ง" }, { status: 500 });
     }
 
   } catch (error) {
     console.error("AI Error:", error);
-    // แจ้งเตือนลูกค้าให้ชัดเจน
+    // ส่ง Error จริงกลับไปให้เห็นชัดๆ จะได้ไม่เดา
     return NextResponse.json({ 
-      error: `ระบบขัดข้อง: ${error.message.includes('404') ? 'รุ่น AI เก่าเกินไป (กำลังอัปเดต)' : 'กรุณาลองใหม่อีกครั้ง'}` 
+      error: `ระบบขัดข้อง: ${error.message}` 
     }, { status: 500 });
   }
 }
