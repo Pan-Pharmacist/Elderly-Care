@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Camera, Volume2, Plus, Trash2, Download, ChevronRight, Activity, Pill, Clock, ArrowLeft, Menu, Phone, User, Home as HomeIcon } from 'lucide-react';
 import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf'; // เพิ่มตัวช่วยสร้าง PDF
 
 export default function Home() {
   const [mode, setMode] = useState('menu');
@@ -31,7 +32,7 @@ export default function Home() {
     if (!file) return;
     const data = await processImage(file);
     if (data?.error) {
-      alert("ระบบ Elderly Care อ่านไม่ออก: " + data.error);
+      alert("AI อ่านไม่ออก: " + data.error);
       return;
     }
     if (targetMode === 'scan') {
@@ -48,13 +49,27 @@ export default function Home() {
     window.speechSynthesis.speak(utterance);
   };
 
+  // --- ฟังก์ชันบันทึก PDF ฉบับสมบูรณ์ ---
   const saveTimeline = () => {
     const element = document.getElementById('timeline-canvas');
+    
+    // แสดงสถานะกำลังบันทึก
+    const originalText = document.getElementById('download-btn-text');
+    if(originalText) originalText.innerText = "กำลังสร้าง PDF...";
+
     html2canvas(element, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
-      const link = document.createElement('a');
-      link.download = 'ตารางยา_NPR.png';
-      link.href = canvas.toDataURL();
-      link.click();
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4'); // สร้าง PDF ขนาด A4 แนวตั้ง
+      
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      
+      // จัดวางรูปกึ่งกลางกระดาษ
+      pdf.addImage(imgData, 'PNG', 0, 10, pdfWidth, pdfHeight);
+      pdf.save('ตารางยา_NPR.pdf');
+
+      if(originalText) originalText.innerText = "บันทึก PDF";
     });
   };
 
@@ -114,7 +129,7 @@ export default function Home() {
              <div className="absolute inset-0 flex items-center justify-center"><Activity className="text-teal-500 animate-pulse" /></div>
           </div>
           <h2 className="text-2xl font-bold text-slate-800 mt-8">กำลังประมวลผล...</h2>
-          <p className="text-slate-500 mt-2 font-light text-lg">ระบบ Elderly Care กำลังอ่านฉลากยา กรุณารอสักครู่</p>
+          <p className="text-slate-500 mt-2 font-light text-lg">AI กำลังอ่านฉลากยา กรุณารอสักครู่</p>
         </div>
       </div>
     );
@@ -258,10 +273,9 @@ export default function Home() {
          </div>
          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-md border border-slate-200 p-2 pl-4 pr-2 rounded-full shadow-2xl flex gap-3 z-50">
              <label className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-full font-bold flex items-center gap-2 cursor-pointer transition-all shadow-md active:scale-95"><Plus size={20} /> เพิ่มยา<input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => handleImageUpload(e, 'timeline')} /></label>
-             {medList.length > 0 && (<><button onClick={saveTimeline} className="w-12 h-12 bg-white text-teal-600 border border-teal-100 rounded-full flex items-center justify-center hover:bg-teal-50 transition-colors active:scale-95"><Download size={20} /></button><button onClick={() => setMedList([])} className="w-12 h-12 bg-white text-red-500 border border-red-100 rounded-full flex items-center justify-center hover:bg-red-50 transition-colors active:scale-95"><Trash2 size={20} /></button></>)}
+             {medList.length > 0 && (<><button onClick={saveTimeline} className="w-12 h-12 bg-white text-teal-600 border border-teal-100 rounded-full flex items-center justify-center hover:bg-teal-50 transition-colors active:scale-95"><Download size={20} /> <span id="download-btn-text" className="ml-2 text-sm">บันทึก PDF</span></button><button onClick={() => setMedList([])} className="w-12 h-12 bg-white text-red-500 border border-red-100 rounded-full flex items-center justify-center hover:bg-red-50 transition-colors active:scale-95"><Trash2 size={20} /></button></>)}
          </div>
       </div>
     );
   }
 }
-
