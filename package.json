@@ -14,7 +14,8 @@
     "react-dom": "19.2.3",
     "@google/generative-ai": "latest",
     "html2canvas": "^1.4.1",
-    "lucide-react": "^0.469.0"
+    "lucide-react": "^0.469.0",
+    "jspdf": "^2.5.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
